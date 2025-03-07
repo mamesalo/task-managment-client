@@ -7,7 +7,6 @@ import { useDispatch, useSelector } from "react-redux";
 import Loading from "../components/Loader";
 import axios from "axios";
 import { setCredentials } from "../redux/slices/authSlice";
-import { handleLogout } from "../utils";
 
 const Login = () => {
   const { user } = useSelector((state) => state.auth);
