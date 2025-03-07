@@ -122,7 +122,10 @@ const TaskDetails = () => {
       .catch((error) => {
         setLoading(false);
         console.error(error);
-        if (error.response.statusText == "Unauthorized") {
+        if (
+          error.response.statusText == "Unauthorized" ||
+          error.response.data.statusText == "Unauthorized"
+        ) {
           handleLogout();
         }
       });
@@ -329,7 +332,10 @@ const Activities = ({ activity, id }) => {
           `error while Create Task ${error.response.data.message} `,
           { variant: "error" }
         );
-        if (error.response.statusText == "Unauthorized") {
+        if (
+          error.response.statusText == "Unauthorized" ||
+          error.response.data.statusText == "Unauthorized"
+        ) {
           handleLogout();
         }
       });

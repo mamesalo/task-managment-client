@@ -77,7 +77,10 @@ const Table = ({ tasks, setReloadData, filter }) => {
       })
       .catch((error) => {
         setLoading(false);
-        if (error.response.statusText == "Unauthorized") {
+        if (
+          error.response.statusText == "Unauthorized" ||
+          error.response.data.statusText == "Unauthorized"
+        ) {
           handleLogout();
         }
         console.error(error);

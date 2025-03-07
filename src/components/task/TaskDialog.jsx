@@ -63,7 +63,10 @@ const TaskDialog = ({ task, setLoading, setReloadData }) => {
           `error while updating ${error.response.data.message} `,
           { variant: "error" }
         );
-        if (error.response.statusText == "Unauthorized") {
+        if (
+          error.response.statusText == "Unauthorized" ||
+          error.response.data.statusText == "Unauthorized"
+        ) {
           handleLogout();
         }
       });
@@ -94,7 +97,10 @@ const TaskDialog = ({ task, setLoading, setReloadData }) => {
       })
       .catch((error) => {
         setLoading(false);
-        if (error.response.statusText == "Unauthorized") {
+        if (
+          error.response.statusText == "Unauthorized" ||
+          error.response.data.statusText == "Unauthorized"
+        ) {
           handleLogout();
         }
         console.error(error);
@@ -132,7 +138,10 @@ const TaskDialog = ({ task, setLoading, setReloadData }) => {
       })
       .catch((error) => {
         setLoading(false);
-        if (error.response.statusText == "Unauthorized") {
+        if (
+          error.response.statusText == "Unauthorized" ||
+          error.response.data.statusText == "Unauthorized"
+        ) {
           handleLogout();
         }
         console.error(error);

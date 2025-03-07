@@ -63,7 +63,10 @@ const AddUser = ({ open, setOpen, userData, teams }) => {
           `error while updating ${error.response.data.message} `,
           { variant: "error" }
         );
-        if (error.response.statusText == "Unauthorized") {
+        if (
+          error.response.statusText == "Unauthorized" ||
+          error.response.data.statusText == "Unauthorized"
+        ) {
           handleLogout();
         }
       });
@@ -96,7 +99,10 @@ const AddUser = ({ open, setOpen, userData, teams }) => {
           `error while registering ${error.response.data.message} `,
           { variant: "error" }
         );
-        if (error.response.statusText == "Unauthorized") {
+        if (
+          error.response.statusText == "Unauthorized" ||
+          error.response.data.statusText == "Unauthorized"
+        ) {
           handleLogout();
         }
       });

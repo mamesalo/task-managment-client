@@ -66,7 +66,10 @@ const AddTask = ({ open, setOpen, task }) => {
           `error while Create Task ${error.response.data.message} `,
           { variant: "error" }
         );
-        if (error.response.statusText == "Unauthorized") {
+        if (
+          error.response.statusText == "Unauthorized" ||
+          error.response.data.statusText == "Unauthorized"
+        ) {
           handleLogout();
         }
       });
@@ -108,7 +111,10 @@ const AddTask = ({ open, setOpen, task }) => {
           `error while Create Task ${error.response.data.message} `,
           { variant: "error" }
         );
-        if (error.response.statusText == "Unauthorized") {
+        if (
+          error.response.statusText == "Unauthorized" ||
+          error.response.data.statusText == "Unauthorized"
+        ) {
           handleLogout();
         }
       });

@@ -32,7 +32,10 @@ const Notification = () => {
       .catch((error) => {
         console.error(error);
         setloading(false);
-        if (error.response.statusText == "Unauthorized") {
+        if (
+          error.response.statusText == "Unauthorized" ||
+          error.response.data.statusText == "Unauthorized"
+        ) {
           handleLogout();
         }
         console.log(error.response.statusText);

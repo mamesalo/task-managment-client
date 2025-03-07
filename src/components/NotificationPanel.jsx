@@ -41,7 +41,10 @@ const NotificationPanel = () => {
         console.error(error);
         setreload(false);
         setloading(false);
-        if (error.response.statusText == "Unauthorized") {
+        if (
+          error.response.statusText == "Unauthorized" ||
+          error.response.data.statusText == "Unauthorized"
+        ) {
           handleLogout();
         }
         console.log(error.response.statusText);
@@ -78,7 +81,10 @@ const NotificationPanel = () => {
           `error while updating ${error.response.data.message} `,
           { variant: "error" }
         );
-        if (error.response.statusText == "Unauthorized") {
+        if (
+          error.response.statusText == "Unauthorized" ||
+          error.response.data.statusText == "Unauthorized"
+        ) {
           handleLogout();
         }
       });

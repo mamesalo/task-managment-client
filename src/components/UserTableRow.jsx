@@ -46,7 +46,10 @@ const UserTableRow = ({ user, teams }) => {
       .catch((error) => {
         setloading(false);
         console.error(error);
-        if (error.response.statusText == "Unauthorized") {
+        if (
+          error.response.statusText == "Unauthorized" ||
+          error.response.data.statusText == "Unauthorized"
+        ) {
           handleLogout();
         }
       });
@@ -82,7 +85,10 @@ const UserTableRow = ({ user, teams }) => {
       .catch((error) => {
         setloading(false);
         console.error(error);
-        if (error.response.statusText == "Unauthorized") {
+        if (
+          error.response.statusText == "Unauthorized" ||
+          error.response.data.statusText == "Unauthorized"
+        ) {
           handleLogout();
         }
       });

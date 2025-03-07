@@ -59,7 +59,10 @@ const Tasks = () => {
         setLoading(false);
         setReloadData(false);
         console.error(error);
-        if (error.response.statusText == "Unauthorized") {
+        if (
+          error.response.statusText == "Unauthorized" ||
+          error.response.data.statusText == "Unauthorized"
+        ) {
           handleLogout();
         }
         console.log(error.response.statusText);
