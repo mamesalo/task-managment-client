@@ -170,6 +170,7 @@ const Dashboard = () => {
       .catch((error) => {
         setLoading(false);
         console.error(error);
+        console.log(error.response.data.statusText == "Unauthorized");
         if (
           error.response.statusText == "Unauthorized" ||
           error.response.data.statusText == "Unauthorized"
