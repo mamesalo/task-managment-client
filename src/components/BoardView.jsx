@@ -1,18 +1,12 @@
 import React from "react";
 import TaskCard from "./TaskCard";
 
-const BoardView = ({ tasks, setReloadData, filter }) => {
+const BoardView = ({ tasks, filter }) => {
   return (
     <div className="w-full py-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 2xl:gap-10">
-      {tasks
-        .filter((item) =>
-          filter
-            ? item.stage == filter && item.isTrashed == false
-            : item.isTrashed == false
-        )
-        .map((task, index) => (
-          <TaskCard task={task} key={task._id} setReloadData={setReloadData} />
-        ))}
+      {tasks.map((task, index) => (
+        <TaskCard task={task} key={task._id} />
+      ))}
     </div>
   );
 };

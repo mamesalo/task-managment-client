@@ -3,69 +3,54 @@ import {
   MdDashboard,
   MdOutlineAddTask,
   MdOutlinePendingActions,
-  MdSettings,
   MdTaskAlt,
+  MdToday,
 } from "react-icons/md";
-import { FaTasks, FaTrashAlt, FaUsers } from "react-icons/fa";
-import { useDispatch, useSelector } from "react-redux";
+import { FaTasks } from "react-icons/fa";
+import { GiProgression } from "react-icons/gi";
+import { useDispatch } from "react-redux";
 import { Link, useLocation } from "react-router-dom";
 import { setOpenSidebar } from "../redux/slices/authSlice";
 import clsx from "clsx";
-import { IoIosNotifications, IoIosNotificationsOutline } from "react-icons/io";
 
-const linkData = [
+const navItem = [
   {
     label: "Dashboard",
     link: "dashboard",
     icon: <MdDashboard />,
   },
   {
-    label: "Tasks",
+    label: "Today",
+    link: "tasks/today",
+    icon: <MdToday />,
+  },
+  {
+    label: "All Tasks",
     link: "tasks",
     icon: <FaTasks />,
   },
   {
     label: "Completed",
-    link: "completed/completed",
+    link: "tasks/completed",
     icon: <MdTaskAlt />,
   },
   {
     label: "In Progress",
-    link: "in-progress/in progress",
-    icon: <MdOutlinePendingActions />,
+    link: "tasks/in-progress",
+    icon: <GiProgression />,
   },
   {
     label: "To Do",
-    link: "todo/todo",
+    link: "tasks/todo",
     icon: <MdOutlinePendingActions />,
-  },
-  {
-    label: "Notification",
-    link: "notification",
-    icon: <IoIosNotifications />,
-  },
-  {
-    label: "Team",
-    link: "team",
-    icon: <FaUsers />,
-  },
-
-  {
-    label: "Trash",
-    link: "trashed",
-    icon: <FaTrashAlt />,
   },
 ];
 
 const Sidebar = () => {
-  const { user } = useSelector((state) => state.auth);
-
   const dispatch = useDispatch();
   const location = useLocation();
 
-  const path = location.pathname.split("/")[1];
-
-  const sidebarLinks = user?.isAdmin ? linkData : linkData.slice(0, 6);
+  const path = location.pathname.replace("/", "");
 
   const closeSidebar = () => {
     dispatch(setOpenSidebar(false));
@@ -78,7 +63,7 @@ const Sidebar = () => {
         onClick={closeSidebar}
         className={clsx(
           "w-full lg:w-3/4 flex gap-2 px-3 py-2 rounded-full items-center text-gray-800 text-base hover:bg-[#2564ed2d]",
-          path === el.link.split("/")[0] ? "bg-blue-700 text-neutral-100" : ""
+          path === el.link ? "bg-blue-700 text-neutral-100" : ""
         )}
       >
         {el.icon}
@@ -96,7 +81,7 @@ const Sidebar = () => {
       </h1>
 
       <div className="flex-1 flex flex-col gap-y-5 py-8">
-        {sidebarLinks.map((link) => (
+        {navItem.map((link) => (
           <NavLink el={link} key={link.label} />
         ))}
       </div>

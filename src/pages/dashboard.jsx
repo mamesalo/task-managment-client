@@ -6,23 +6,16 @@ import {
   MdKeyboardDoubleArrowUp,
 } from "react-icons/md";
 import { LuClipboardEdit } from "react-icons/lu";
-import { FaNewspaper, FaUsers } from "react-icons/fa";
+import { FaNewspaper } from "react-icons/fa";
 import { FaArrowsToDot } from "react-icons/fa6";
 import moment from "moment";
 import clsx from "clsx";
 import { Chart } from "../components/Chart";
-import {
-  BGS,
-  PRIOTITYSTYELS,
-  TASK_TYPE,
-  getInitials,
-  handleLogout,
-} from "../utils";
+import { BGS, PRIOTITYSTYELS, TASK_TYPE, handleLogout } from "../utils";
 import UserInfo from "../components/UserInfo";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import Loading from "../components/Loader";
 import axios from "axios";
-import { setDashboard } from "../redux/slices/dashboardSlice";
 
 const TaskTable = ({ tasks }) => {
   const ICONS = {
@@ -36,7 +29,6 @@ const TaskTable = ({ tasks }) => {
       <tr className="text-black text-left">
         <th className="py-2">Task Title</th>
         <th className="py-2">Priority</th>
-        <th className="py-2">Team</th>
         <th className="py-2 hidden md:block">Created At</th>
       </tr>
     </thead>
@@ -63,21 +55,6 @@ const TaskTable = ({ tasks }) => {
         </div>
       </td>
 
-      <td className="py-2">
-        <div className="flex">
-          {task.team.map((m, index) => (
-            <div
-              key={index}
-              className={clsx(
-                "w-7 h-7 rounded-full text-white flex items-center justify-center text-sm -mr-1",
-                BGS[index % BGS.length]
-              )}
-            >
-              <UserInfo user={m} />
-            </div>
-          ))}
-        </div>
-      </td>
       <td className="py-2 hidden md:block">
         <span className="text-base text-gray-600">
           {moment(task?.date).fromNow()}
@@ -86,70 +63,32 @@ const TaskTable = ({ tasks }) => {
     </tr>
   );
   return (
-    <>
-      <div className="w-full md:w-2/3 bg-white px-2 md:px-4 pt-4 pb-4 shadow-md rounded">
-        <table className="w-full">
-          <TableHeader />
-          <tbody>
-            {tasks?.map((task, id) => (
-              <TableRow key={id} task={task} />
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </>
-  );
-};
-
-const UserTable = ({ users }) => {
-  const TableHeader = () => (
-    <thead className="border-b border-gray-300 ">
-      <tr className="text-black  text-left">
-        <th className="py-2">Full Name</th>
-
-        <th className="py-2">Created At</th>
-      </tr>
-    </thead>
-  );
-
-  const TableRow = ({ user }) => (
-    <tr className="border-b border-gray-200  text-gray-600 hover:bg-gray-400/10">
-      <td className="py-2">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full text-white flex items-center justify-center text-sm bg-violet-700">
-            <span className="text-center">{getInitials(user?.name)}</span>
-          </div>
-
-          <div>
-            <p> {user.name}</p>
-            <span className="text-xs text-black">{user?.role}</span>
-          </div>
-        </div>
-      </td>
-
-      <td className="py-2 text-sm">{moment(user?.createdAt).fromNow()}</td>
-    </tr>
-  );
-
-  return (
-    <div className="w-full md:w-1/3 bg-white h-fit px-2 md:px-6 py-4 shadow-md rounded">
-      <table className="w-full mb-5">
+    <div className="w-full md:w-2/3 bg-white px-2 md:px-4 pt-4 pb-4 shadow-md rounded">
+      <table className="w-full">
         <TableHeader />
         <tbody>
-          {users?.map((user, index) => (
-            <TableRow key={index + user?._id} user={user} />
+          {tasks?.map((task, id) => (
+            <TableRow key={id} task={task} />
           ))}
         </tbody>
       </table>
     </div>
   );
 };
-const Dashboard = () => {
-  const { dashboard } = useSelector((state) => state.dashboard);
 
-  const dispatch = useDispatch();
+const Dashboard = () => {
+  const { token } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(false);
-  const token = document.cookie.split("; ");
+  const [dasboardData, setDasboardData] = useState({
+    totalTasks: 0,
+    last10Task: [],
+    tasks: {
+      todo: 0,
+      "in progress": 0,
+      completed: 0,
+    },
+    chartData: [],
+  });
 
   useEffect(() => {
     setLoading(true);
@@ -161,11 +100,18 @@ const Dashboard = () => {
         withCredentials: true, // Ensure cookies are sent if needed
       })
       .then((response) => {
-        dispatch(setDashboard(response.data));
-
-        // dispatch(setTasks(response.data.tasks));
+        console.log(response);
         setLoading(false);
-        // setReloadData(false);
+        setDasboardData({
+          totalTasks: response.data.totalTasks || 0,
+          last10Task: response.data.last10Task || [],
+          tasks: {
+            todo: response.data.tasks["todo"] || 0,
+            "in progress": response.data.tasks["in progress"] || 0,
+            completed: response.data.tasks["completed"] || 0,
+          },
+          chartData: response.data.chartData || [],
+        });
       })
       .catch((error) => {
         setLoading(false);
@@ -184,28 +130,28 @@ const Dashboard = () => {
     {
       _id: "1",
       label: "TOTAL TASK",
-      total: dashboard?.totalTasks || 0,
+      total: dasboardData?.totalTasks || 0,
       icon: <FaNewspaper />,
       bg: "bg-[#1d4ed8]",
     },
     {
       _id: "2",
       label: "COMPLTED TASK",
-      total: dashboard?.tasks["completed"] || 0,
+      total: ["completed"] || 0,
       icon: <MdAdminPanelSettings />,
       bg: "bg-[#0f766e]",
     },
     {
       _id: "3",
       label: "TASK IN PROGRESS ",
-      total: dashboard?.tasks["in progress"] || 0,
+      total: ["in progress"] || 0,
       icon: <LuClipboardEdit />,
       bg: "bg-[#f59e0b]",
     },
     {
       _id: "4",
       label: "TODOS",
-      total: dashboard?.tasks["todo"],
+      total: ["todo"] || 0,
       icon: <FaArrowsToDot />,
       bg: "bg-[#be185d]" || 0,
     },
@@ -216,8 +162,7 @@ const Dashboard = () => {
       <div className="w-full h-32 bg-white p-5 shadow-md rounded-md flex items-center justify-between">
         <div className="h-full flex flex-1 flex-col justify-between">
           <p className="text-base text-gray-600">{label}</p>
-          <span className="text-2xl font-semibold">{count}</span>
-          <span className="text-sm text-gray-400">{"110 last month"}</span>
+          <span className="text-lg font-semibold">{count}</span>
         </div>
 
         <div
@@ -243,22 +188,16 @@ const Dashboard = () => {
           <Card key={index} icon={icon} bg={bg} label={label} count={total} />
         ))}
       </div>
-
       <div className="w-full bg-white my-16 p-4 rounded shadow-sm">
         <h4 className="text-xl text-gray-600 font-semibold">
           Chart by Priority
         </h4>
-        <Chart />
-      </div>
-
+        <Chart data={dasboardData.chartData} />
+      </div>{" "}
+      <h3 className="text-xl font-semibold">Recent Tasks</h3>
       <div className="w-full flex flex-col md:flex-row gap-4 2xl:gap-10 py-8">
         {/* /left */}
-
-        <TaskTable tasks={dashboard.last10Task} />
-
-        {/* /right */}
-
-        <UserTable users={dashboard.users} />
+        <TaskTable tasks={dasboardData.last10Task} />
       </div>
     </div>
   );

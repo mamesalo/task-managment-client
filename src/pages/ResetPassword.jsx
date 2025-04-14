@@ -1,37 +1,43 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import Textbox from "../components/Textbox";
 import Button from "../components/Button";
-import { useDispatch, useSelector } from "react-redux";
+
 import Loading from "../components/Loader";
 import axios from "axios";
-import { setCredentials } from "../redux/slices/authSlice";
+import { useSnackbar } from "notistack";
 
-const Login = () => {
-  const { user } = useSelector((state) => state.auth);
+const ResetPassword = () => {
+  const param = useParams();
   const [loading, setloading] = useState(false);
   const [error, seterror] = useState("");
-  const dispatch = useDispatch();
+  const { enqueueSnackbar } = useSnackbar();
+
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm();
-
+  const password = watch("password");
   const navigate = useNavigate();
 
   const submitHandler = async (data) => {
     setloading(true);
-
     axios
-      .post(`${import.meta.env.VITE_API_URL}/api/user/login`, data, {
-        withCredentials: true, // Required to send cookies
+      .put(`${import.meta.env.VITE_API_URL}/api/user/reset-password`, data, {
+        headers: {
+          Authorization: `Bearer ${param.token}`,
+          // Pass the token in the headers
+        },
+
+        withCredentials: true, // Ensure cookies are sent if needed
       })
       .then((response) => {
-        dispatch(setCredentials(response.data));
+        enqueueSnackbar(response.data.message, { variant: "success" });
+        navigate("/log-in");
         setloading(false);
-        return;
       })
       .catch((error) => {
         setloading(false);
@@ -39,10 +45,6 @@ const Login = () => {
         console.error(error);
       });
   };
-
-  useEffect(() => {
-    user && navigate("/dashboard");
-  }, [user]);
 
   return (
     <div className="w-full min-h-screen flex items-center justify-center flex-col lg:flex-row bg-[#f3f4f6]">
@@ -71,49 +73,49 @@ const Login = () => {
             className="form-container w-full md:w-[400px] flex flex-col gap-y-8 bg-white px-10 pt-14 pb-14"
           >
             <div className="">
-              <p className="text-blue-600 text-3xl font-bold text-center">
-                Welcome back!
-              </p>
+              {/* <p className="text-blue-600 text-3xl font-bold text-center">
+                Create an account and start managing your to do in one place.
+              </p> */}
               <p className="text-center text-base text-gray-700 ">
-                Keep all your credential safge.
+                Forget Password
               </p>
             </div>
 
             <div className="flex flex-col gap-y-5">
               <Textbox
-                placeholder="email@example.com"
-                type="email"
-                name="email"
-                label="Email Address"
-                className="w-full rounded-full"
-                register={register("email", {
-                  required: "Email Address is required!",
-                })}
-                error={errors.email ? errors.email.message : ""}
-              />
-              <Textbox
-                placeholder="your password"
+                placeholder="password"
                 type="password"
                 name="password"
                 label="Password"
-                className="w-full rounded-full"
+                className="w-full rounded"
                 register={register("password", {
-                  required: "Password is required!",
+                  required: "required!",
+                  validate: (value) =>
+                    value.length >= 6 ||
+                    "Passwords must be at least 6 characters",
                 })}
                 error={errors.password ? errors.password.message : ""}
               />
-
+              <Textbox
+                placeholder="confirm password"
+                type="password"
+                name="confirm_password"
+                label="Confirm Password"
+                className="w-full rounded"
+                register={register("confirm_password", {
+                  required: "required!",
+                  validate: (value) =>
+                    value === password || "Passwords do not match",
+                })}
+                error={
+                  errors.confirm_password ? errors.confirm_password.message : ""
+                }
+              />
               <Link
-                to="/forget-password"
+                to="/log-in"
                 className="text-sm text-gray-500 hover:text-blue-600 hover:underline cursor-pointer"
               >
-                Forget Password?
-              </Link>
-              <Link
-                to="/sign-up"
-                className="text-sm text-gray-500 hover:text-blue-600 hover:underline cursor-pointer"
-              >
-                Don't have an account? Sign Up
+                Back to Login
               </Link>
 
               {loading ? (
@@ -121,7 +123,7 @@ const Login = () => {
               ) : (
                 <Button
                   type="submit"
-                  label="Sign In"
+                  label="Save"
                   className="w-full h-10 bg-blue-700 text-white rounded-full"
                 />
               )}
@@ -134,4 +136,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default ResetPassword;

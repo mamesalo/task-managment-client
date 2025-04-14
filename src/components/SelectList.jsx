@@ -4,8 +4,6 @@ import { BsChevronExpand } from "react-icons/bs";
 import { MdCheck } from "react-icons/md";
 
 const SelectList = ({ lists, selected, setSelected, label }) => {
-  // console.log(selected);
-
   return (
     <div className="w-full">
       {label && <p className="text-slate-900 dark:text-gray-500">{label}</p>}

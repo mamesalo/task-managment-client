@@ -10,11 +10,13 @@ import Sidebar from "./components/Sidebar";
 import Login from "./pages/Login";
 import TaskDetails from "./pages/TaskDetails";
 import Tasks from "./pages/Tasks";
-import Trash from "./pages/Trash";
-import Users from "./pages/Users";
 import Dashboard from "./pages/dashboard";
 import { setOpenSidebar } from "./redux/slices/authSlice";
-import Notification from "./pages/Notification";
+import PageNotFound from "./pages/PageNotFound";
+import SignUp from "./pages/SignUp";
+import VerfiyEmail from "./pages/VerfiyEmail";
+import ForgetPassword from "./pages/ForgetPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 function Layout() {
   const { user } = useSelector((state) => state.auth);
@@ -101,16 +103,15 @@ function App() {
           <Route index path="/" element={<Navigate to="/dashboard" />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/tasks" element={<Tasks />} />
-          <Route path="/completed/:status" element={<Tasks />} />
-          <Route path="/in-progress/:status" element={<Tasks />} />
-          <Route path="/todo/:status" element={<Tasks />} />
-          <Route path="/team" element={<Users />} />
-          <Route path="/trashed" element={<Trash />} />
+          <Route path="/tasks/:status" element={<Tasks />} />
           <Route path="/task/:id" element={<TaskDetails />} />
-          <Route path="/notification" element={<Notification />} />
         </Route>
-
         <Route path="/log-in" element={<Login />} />
+        <Route path="/sign-up" element={<SignUp />} />
+        <Route path="/forget-password" element={<ForgetPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path="/verify/:token" element={<VerfiyEmail />} />
+        <Route path="*" element={<PageNotFound />} />
       </Routes>
 
       <Toaster richColors />

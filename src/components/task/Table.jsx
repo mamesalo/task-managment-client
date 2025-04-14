@@ -1,24 +1,20 @@
 import React, { useState } from "react";
-import { BiMessageAltDetail } from "react-icons/bi";
+
 import {
-  MdAttachFile,
   MdKeyboardArrowDown,
   MdKeyboardArrowUp,
   MdKeyboardDoubleArrowUp,
 } from "react-icons/md";
-import { BGS, PRIOTITYSTYELS, TASK_TYPE, formatDate } from "../../utils";
+import { PRIOTITYSTYELS, TASK_TYPE, formatDate } from "../../utils";
 import clsx from "clsx";
-import { FaList } from "react-icons/fa";
-import UserInfo from "../UserInfo";
-import Button from "../Button";
+
 import ConfirmatioDialog from "../Dialogs";
-import axios from "axios";
+
 import Loading from "../Loader";
-import { useDispatch, useSelector } from "react-redux";
-import { setTasks } from "../../redux/slices/taskSlice";
-import { useSnackbar } from "notistack";
+
 import AddTask from "./AddTask";
-import { useNavigate } from "react-router-dom";
+import moment from "moment";
+import TaskDialog from "./TaskDialog";
 
 const ICONS = {
   high: <MdKeyboardDoubleArrowUp />,
@@ -26,187 +22,65 @@ const ICONS = {
   low: <MdKeyboardArrowDown />,
 };
 
-const Table = ({ tasks, setReloadData, filter }) => {
-  const { user } = useSelector((state) => state.auth);
+const Table = ({ task }) => {
   const [openDialog, setOpenDialog] = useState(false);
   const [openEditDialog, setOpenEditDialog] = useState(false);
-  const [selectedTask, setSelectedTask] = useState(null);
   const [loading, setLoading] = useState(false);
-  const token = document.cookie.split("; ");
-  const dispatch = useDispatch();
-  const { enqueueSnackbar } = useSnackbar();
-  const navigate = useNavigate();
 
-  const deleteClicks = (task) => {
-    setSelectedTask(task);
-    setOpenDialog(true);
-  };
-  const editClicks = (task) => {
-    setSelectedTask(task);
-    setOpenEditDialog(true);
-  };
-
-  const deleteHandler = () => {
-    setLoading(true);
-    setOpenDialog(false);
-    axios
-      .delete(
-        `${import.meta.env.VITE_API_URL}/api/task/delete-restore/${
-          selectedTask._id
-        }`,
-
-        {
-          data: { actionType: "trash" },
-          headers: {
-            Authorization: `Bearer ${token}`,
-            // Pass the token in the headers
-          },
-
-          withCredentials: true, // Ensure cookies are sent if needed
-        }
-      )
-      .then(() => {
-        const updatedTask = tasks.map((item) =>
-          item._id == selectedTask._id ? { ...item, isTrashed: true } : item
-        );
-        dispatch(setTasks(updatedTask));
-        enqueueSnackbar(`task removed to trash successfully `, {
-          variant: "success",
-        });
-        setLoading(false);
-      })
-      .catch((error) => {
-        setLoading(false);
-        if (
-          error.response.statusText == "Unauthorized" ||
-          error.response.data.statusText == "Unauthorized"
-        ) {
-          handleLogout();
-        }
-        console.error(error);
-      });
-  };
-
-  const TableHeader = () => (
-    <thead className="w-full border-b border-gray-300">
-      <tr className="w-full text-black  text-left">
-        <th className="py-2">Task Title</th>
-        <th className="py-2">Priority</th>
-        <th className="py-2 line-clamp-1">Created At</th>
-        <th className="py-2">Assets</th>
-        <th className="py-2">Team</th>
-      </tr>
-    </thead>
-  );
-
-  const TableRow = ({ task }) => (
-    <tr className="border-b border-gray-200 text-gray-600 hover:bg-gray-300/10 ">
-      <td className="py-2">
-        <div className="flex items-center gap-2">
-          <div
-            className={clsx(
-              "w-4 h-4 rounded-full cursor-pointer",
-              TASK_TYPE[task.stage]
-            )}
-          />
-          <p
-            className="w-full line-clamp-2 text-base text-black cursor-pointer hover:text-blue-600 "
-            onClick={() => navigate(`/task/${task._id}`)}
-          >
-            {task?.title}
-          </p>
-        </div>
-      </td>
-
-      <td className="py-2">
-        <div className={"flex gap-1 items-center"}>
-          <span className={clsx("text-lg", PRIOTITYSTYELS[task?.priority])}>
-            {ICONS[task?.priority]}
-          </span>
-          <span className="capitalize line-clamp-1">
-            {task?.priority} Priority
-          </span>
-        </div>
-      </td>
-
-      <td className="py-2">
-        <span className="text-sm text-gray-600">
-          {formatDate(new Date(task?.date))}
-        </span>
-      </td>
-
-      <td className="py-2">
-        <div className="flex items-center gap-3">
-          <div className="flex gap-1 items-center text-sm text-gray-600">
-            <BiMessageAltDetail />
-            <span>{task?.activities?.length}</span>
-          </div>
-          <div className="flex gap-1 items-center text-sm text-gray-600 dark:text-gray-400">
-            <MdAttachFile />
-            <span>{task?.assets?.length}</span>
-          </div>
-          <div className="flex gap-1 items-center text-sm text-gray-600 dark:text-gray-400">
-            <FaList />
-            <span>0/{task?.subTasks?.length}</span>
-          </div>
-        </div>
-      </td>
-
-      <td className="py-2">
-        <div className="flex">
-          {task?.team?.map((m, index) => (
-            <div
-              key={m._id}
-              className={clsx(
-                "w-7 h-7 rounded-full text-white flex items-center justify-center text-sm -mr-1",
-                BGS[index % BGS?.length]
-              )}
-            >
-              <UserInfo user={m} />
-            </div>
-          ))}
-        </div>
-      </td>
-
-      {user.isAdmin && (
-        <td className="py-2 flex gap-2 md:gap-4 justify-end">
-          <Button
-            className="text-blue-600 hover:text-blue-500 sm:px-0 text-sm md:text-base"
-            label="Edit"
-            type="button"
-            onClick={() => editClicks(task)}
-          />
-
-          <Button
-            className="text-red-700 hover:text-red-500 sm:px-0 text-sm md:text-base"
-            label="Delete"
-            type="button"
-            onClick={() => deleteClicks(task)}
-          />
-        </td>
-      )}
-    </tr>
-  );
   return (
     <>
-      <div className="bg-white  px-2 md:px-4 pt-4 pb-9 shadow-md rounded">
-        {loading && <Loading />}
-        <div className="overflow-x-auto">
-          <table className="w-full ">
-            <TableHeader />
-            <tbody>
-              {tasks
-                .filter((item) =>
-                  filter
-                    ? item.stage == filter && item.isTrashed == false
-                    : item.isTrashed == false
-                )
-                .map((task, index) => (
-                  <TableRow key={index} task={task} />
-                ))}
-            </tbody>
-          </table>
-        </div>
+      <div className=" mt-6">
+        <ul className="bg-white shadow-md rounded flex flex-col ">
+          <li className="p-4 border-b last:border-b-0 flex flex-col justify-between sm:flex-row sm:items-center relative ">
+            {loading && (
+              <div className="absolute top-0 left-0 w-full h-full bg-white/50 flex items-center justify-center rounded-md">
+                <Loading />
+              </div>
+            )}
+            <div className="absolute top-0 right-0 p-2">
+              <TaskDialog task={task} setLoading={setLoading} />
+            </div>
+            <div>
+              <h4
+                className={`line-clamp-1 text-black ${
+                  task.stage == "completed" && `line-through text-gray-700`
+                }  `}
+              >
+                {task?.title}
+              </h4>
+              <h4 className="line-clamp-1 text-gray-700 my-4">
+                {task?.description}
+              </h4>
+              <span className="text-sm black">
+                {formatDate(new Date(task?.date))}
+              </span>
+              <div className="flex items-center gap-2  my-3">
+                <span className="text-sm text-gray-600">Created Date:</span>
+                <span className="text-sm text-gray-600">
+                  {moment(task?.createdAt).fromNow()}
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center gap-5">
+              <div
+                className={clsx(
+                  "flex flex-1 gap-1 items-center text-sm font-medium",
+                  PRIOTITYSTYELS[task?.priority]
+                )}
+              >
+                <span className="text-lg">{ICONS[task?.priority]}</span>
+                <span className="uppercase">{task?.priority} Priority</span>
+              </div>
+              <span
+                className={`text-sm text-white capitalize px-3 py-2 rounded  ${
+                  TASK_TYPE[task?.stage]
+                } `}
+              >
+                {task?.stage}
+              </span>
+            </div>
+          </li>
+        </ul>
       </div>
 
       {/* TODO */}

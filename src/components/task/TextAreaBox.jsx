@@ -1,7 +1,7 @@
 import React from "react";
 import clsx from "clsx";
 
-const Textbox = React.forwardRef(
+const TextAreaBox = React.forwardRef(
   (
     {
       type,
@@ -25,7 +25,8 @@ const Textbox = React.forwardRef(
         )}
 
         <div>
-          <input
+          <textarea
+            rows={5}
             disabled={disabled}
             defaultValue={defaultValue}
             type={type}
@@ -35,7 +36,7 @@ const Textbox = React.forwardRef(
             {...register}
             aria-invalid={error ? "true" : "false"}
             className={clsx(
-              `bg-transparent px-3 py-2.5 2xl:py-3 border ${
+              `bg-transparent px-3 py-2.5 2xl:py-3 border resize-none ${
                 error ? `border-[#f64949fe]` : `border-gray-300`
               } placeholder-gray-400 text-gray-900 outline-none text-base focus:ring-2 ring-blue-300`,
               className
@@ -49,4 +50,4 @@ const Textbox = React.forwardRef(
     );
   }
 );
-export default Textbox;
+export default TextAreaBox;

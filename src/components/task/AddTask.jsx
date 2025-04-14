@@ -3,7 +3,6 @@ import ModalWrapper from "../ModalWrapper";
 import { Dialog } from "@headlessui/react";
 import Textbox from "../Textbox";
 import { useForm } from "react-hook-form";
-import UserList from "./UserList";
 import SelectList from "../SelectList";
 import Button from "../Button";
 import { useSnackbar } from "notistack";
@@ -12,8 +11,10 @@ import Loading from "../Loader";
 import axios from "axios";
 import { setTasks } from "../../redux/slices/taskSlice";
 import { handleLogout } from "../../utils";
+import TextAreaBox from "./TextAreaBox";
 
 const LISTS = ["TODO", "IN PROGRESS"];
+const LISTS_EDIT = ["TODO", "IN PROGRESS", "COMPLETED"];
 const PRIORIRY = ["HIGH", "MEDIUM", "NORMAL", "LOW"];
 
 const AddTask = ({ open, setOpen, task }) => {
@@ -22,21 +23,18 @@ const AddTask = ({ open, setOpen, task }) => {
     handleSubmit,
     formState: { errors },
   } = useForm();
-  const [team, setTeam] = useState(task ? task.team : []);
   const [stage, setStage] = useState(task ? task.stage : LISTS[0]);
   const [priority, setPriority] = useState(task ? task.priority : PRIORIRY[2]);
   const [loading, setLoading] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
   const dispatch = useDispatch();
   const { tasks } = useSelector((state) => state.tasks);
-  const { teams } = useSelector((state) => state.teams); //from redux
-  const token = document.cookie.split("; ");
-
+  const { token } = useSelector((state) => state.auth);
   const handleAddtask = (data) => {
     axios
       .post(
         `${import.meta.env.VITE_API_URL}/api/task/create`,
-        { ...data, stage, priority, team },
+        { ...data, stage, priority },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -47,14 +45,7 @@ const AddTask = ({ open, setOpen, task }) => {
         }
       )
       .then((response) => {
-        let data = response.data.task;
-        let teamField = data.team;
-        let newTeamField = teamField.map((id) =>
-          teams.find((singleTeam) => id == singleTeam._id)
-        );
-
-        data.team = newTeamField;
-        dispatch(setTasks([data, ...tasks]));
+        dispatch(setTasks([response.data.task, ...tasks]));
         setLoading(false);
         setOpen(false);
         enqueueSnackbar("Task Created Succesfully", { variant: "success" });
@@ -79,7 +70,7 @@ const AddTask = ({ open, setOpen, task }) => {
     axios
       .put(
         `${import.meta.env.VITE_API_URL}/api/task/update/${task._id}`,
-        { ...data, stage, priority, team },
+        { ...data, stage, priority },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -90,15 +81,12 @@ const AddTask = ({ open, setOpen, task }) => {
         }
       )
       .then((response) => {
-        let data = response.data.task;
-        let teamField = data.team;
-        let newTeamField = teamField.map((id) =>
-          teams.find((singleTeam) => id == singleTeam._id)
-        );
-
-        data.team = newTeamField;
         dispatch(
-          setTasks(tasks.map((task) => (task._id == data._id ? data : task)))
+          setTasks(
+            tasks.map((task) =>
+              task._id == response.data.task._id ? response.data.task : task
+            )
+          )
         );
         setLoading(false);
         setOpen(false);
@@ -147,19 +135,24 @@ const AddTask = ({ open, setOpen, task }) => {
               register={register("title", { required: "Title is required" })}
               error={errors.title ? errors.title.message : ""}
             />
-
-            <UserList
-              setTeam={setTeam}
-              team={team}
-              selectedTeam={task && task.team}
-              teams={teams}
+            <TextAreaBox
+              defaultValue={task && task.description}
+              placeholder="Task Description"
+              type="text"
+              name="description"
+              label="Task Description"
+              className="w-full rounded"
+              register={register("description", {
+                required: "Description is required",
+              })}
+              error={errors.description ? errors.description.message : ""}
             />
 
             <div className="flex gap-4">
               <SelectList
                 label="Task Stage"
-                lists={LISTS}
-                selected={stage}
+                lists={task ? LISTS_EDIT : LISTS}
+                selected={stage?.toUpperCase()}
                 setSelected={setStage}
               />
 

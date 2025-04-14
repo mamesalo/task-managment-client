@@ -2,21 +2,16 @@ import { Menu, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
 import { FaUser, FaUserLock } from "react-icons/fa";
 import { IoLogOutOutline } from "react-icons/io5";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+
 import { getInitials, handleLogout } from "../utils";
 import Changepassword from "./Changepassword";
+import Profile from "./Profile";
 
 const UserAvatar = () => {
-  const [open, setOpen] = useState(false);
   const [openPassword, setOpenPassword] = useState(false);
+  const [openProfile, setOpenProfile] = useState(false);
   const { user } = useSelector((state) => state.auth);
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-
-  const logoutHandler = () => {
-    console.log("logout");
-  };
 
   return (
     <>
@@ -41,17 +36,17 @@ const UserAvatar = () => {
           >
             <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right divide-gray-100 rounded-md bg-white shadow-2xl ring-1 ring-black/5 focus:outline-none">
               <div className="p-4">
-                {/* <Menu.Item>
+                <Menu.Item>
                   {({ active }) => (
                     <button
-                      onClick={() => setOpen(true)}
+                      onClick={() => setOpenProfile(true)}
                       className="text-gray-700 group flex w-full items-center rounded-md px-2 py-2 text-base"
                     >
                       <FaUser className="mr-2" aria-hidden="true" />
                       Profile
                     </button>
                   )}
-                </Menu.Item> */}
+                </Menu.Item>
 
                 <Menu.Item>
                   {({ active }) => (
@@ -84,6 +79,7 @@ const UserAvatar = () => {
       {openPassword && (
         <Changepassword open={openPassword} setOpen={setOpenPassword} />
       )}
+      {openProfile && <Profile open={openProfile} setOpen={setOpenProfile} />}
     </>
   );
 };

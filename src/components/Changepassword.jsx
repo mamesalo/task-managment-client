@@ -8,9 +8,10 @@ import { useState } from "react";
 import { handleLogout } from "../utils";
 import ModalWrapper from "./ModalWrapper";
 import Loading from "./Loader";
+import { useSelector } from "react-redux";
 
 const Changepassword = ({ open, setOpen }) => {
-  const token = document.cookie.split("; ");
+  const { token } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(false);
   const { enqueueSnackbar } = useSnackbar();
   const {
@@ -21,28 +22,12 @@ const Changepassword = ({ open, setOpen }) => {
   } = useForm();
   const password = watch("password");
 
-  // const [addSbTask] = useCreateSubTaskMutation();
-
-  // const handleOnSubmit = async (data) => {
-  // try {
-  //   const res = await addSbTask({ data, id }).unwrap();
-  //   toast.success(res.message);
-  //   setTimeout(() => {
-  //     setOpen(false);
-  //   }, 500);
-  // } catch (err) {
-  //   console.log(err);
-  //   toast.error(err?.data?.message || err.error);
-  // }
-  // };
-
   const handleOnSubmit = (data) => {
-    console.log(data);
     setLoading(true);
     axios
       .put(
         `${import.meta.env.VITE_API_URL}/api/user/change-password/`,
-        { password: data.password },
+        { password: data.password, old_password: data.old_password },
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -66,7 +51,7 @@ const Changepassword = ({ open, setOpen }) => {
         setLoading(false);
         console.error(error);
         enqueueSnackbar(
-          `error while Create Sub Task ${error.response.data.message} `,
+          `error while changing password ${error.response.data.message} `,
           { variant: "error" }
         );
         if (
@@ -74,6 +59,7 @@ const Changepassword = ({ open, setOpen }) => {
           error.response.data.statusText == "Unauthorized"
         ) {
           handleLogout();
+          enqueueSnackbar(`Unauthorized, Action`, { variant: "error" });
         }
       });
   };
@@ -90,6 +76,17 @@ const Changepassword = ({ open, setOpen }) => {
           </Dialog.Title>
           <div className="mt-2 flex flex-col gap-6">
             <Textbox
+              placeholder="old password"
+              type="password"
+              name="old_password"
+              label="Old Passwpord"
+              className="w-full rounded"
+              register={register("old_password", {
+                required: "required!",
+              })}
+              error={errors.old_password ? errors.old_password.message : ""}
+            />
+            <Textbox
               placeholder="password"
               type="password"
               name="password"
@@ -97,6 +94,9 @@ const Changepassword = ({ open, setOpen }) => {
               className="w-full rounded"
               register={register("password", {
                 required: "required!",
+                validate: (value) =>
+                  value.length >= 6 ||
+                  "Passwords must be at least 6 characters",
               })}
               error={errors.password ? errors.password.message : ""}
             />
